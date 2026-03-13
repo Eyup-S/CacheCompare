@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cachecompare-postgres
+    environment:
+      POSTGRES_DB: cachecompare
+      POSTGRES_USER: cacheuser
+      POSTGRES_PASSWORD: cachepass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cacheuser -d cachecompare"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cachecompare-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  hazelcast:
+    image: hazelcast/hazelcast:5.3
+    container_name: cachecompare-hazelcast
+    ports:
+      - "5701:5701"
+    environment:
+      JAVA_OPTS: "-Dhazelcast.local.publicAddress=127.0.0.1:5701"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5701/hazelcast/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

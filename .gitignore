@@ -1,0 +1,20 @@
+# Build
+cachecompare-web/target/
+
+# Benchmark çıktıları
+logs/
+benchmark-results/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Ortam
+.env
+*.local
+
+.claude/
