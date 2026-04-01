@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: cachecompare-redis-om
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cachecompare
+    username: cacheuser
+    password: cachepass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+dataset:
+  size: 1000
+
+cache:
+  strategy: lazy
+  log:
+    dir: logs-redis-om
+
+---
+spring:
+  config:
+    activate:
+      on-profile: redis-template
+
+  # Redis OM auto-config'i tamamen devre dışı bırak
+  # Gerçek class adı: com.redis.om.spring.RedisModulesConfiguration
+  autoconfigure:
+    exclude:
+      - com.redis.om.spring.RedisModulesConfiguration
+
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 2000ms
+      client-type: lettuce
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+
+---
+spring:
+  config:
+    activate:
+      on-profile: redis-om
+
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 2000ms
+      # Redis OM, Jedis istemcisi gerektirir (Lettuce değil)
+      client-type: jedis
+      jedis:
+        pool:
+          max-active: 10
+          max-idle: 5
