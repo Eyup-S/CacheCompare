@@ -43,5 +43,25 @@ services:
       timeout: 5s
       retries: 10
 
+  # Redis Stack — Redis OM for Spring için gerekli (RedisJSON modülü)
+  # Port 6380: mevcut Redis (6379) ile çakışmamak için
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: cachecompare-redis-stack
+    ports:
+      - "6380:6379"    # Redis protokolü
+      - "8001:8001"    # RedisInsight UI (opsiyonel)
+    command: >
+      redis-stack-server
+      --save ""
+      --appendonly no
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   postgres_data:
